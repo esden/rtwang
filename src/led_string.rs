@@ -52,10 +52,7 @@ impl LED {
     }
 
     pub fn set_hsv(&mut self, h: u8, s: u8, v: u8) {
-        let rgb = hsv_rainbow(h, s, v);
-        self.r = rgb.0;
-        self.g = rgb.1;
-        self.b = rgb.2;
+        self.set_rgb(hsv_rainbow(h, s, v));
     }
 
     pub fn nscale8(&mut self, scale: u8) {
@@ -83,13 +80,21 @@ pub struct LEDString {
 }
 
 impl LEDString {
+
 	pub fn new(color: [u8; 3], length: u32) -> LEDString {
 		LEDString {
 			leds: vec![LED::new(color); length as usize]
 		}
 	}
+
     pub fn len(&self) -> usize{
         self.leds.len()
+    }
+
+    pub fn nscale8(&mut self, scale: u8) {
+        for led in &mut self.leds {
+            led.nscale8(scale);
+        }
     }
 }
 
@@ -106,22 +111,6 @@ impl IndexMut<usize> for LEDString {
         &mut self.leds[i]
     }
 }
-
-// impl IntoIterator for LEDString {
-//     type Item = LED;
-//     type IntoIter = std::vec::IntoIter<Self::Item>;
-
-//     fn into_iter(self) -> Self::IntoIter {
-//         self.leds.into_iter()
-//     }
-//  }
-
-// impl Iterator for LEDString {
-//     type Item = LED;
-//     fn next(&mut self) -> Option<Self::Item> {
-//         unimplemented!()
-//     }
-// }
 
 /*****************************************************************************
  * Value operator functions
@@ -147,7 +136,7 @@ pub fn scale8_video(val: u8, scaler: u8) -> u8 {
     ret as u8
 }
 
- pub fn hsv_rainbow(h: u8, s: u8, v: u8) -> (u8, u8, u8) {
+ pub fn hsv_rainbow(h: u8, s: u8, v: u8) -> [u8; 3] {
     // Yellow has a higher inherent brightness than any other color; pure yellow is perceived to be 93% as bright
     // as white. In order to make yellow appear the correct relative brightness, it has to be rendered brighter
     // than all other colors.
@@ -309,5 +298,5 @@ pub fn scale8_video(val: u8, scaler: u8) -> u8 {
         }
     }
 
-    (r, g, b)
+    [r, g, b]
 }

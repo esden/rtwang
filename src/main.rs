@@ -68,7 +68,7 @@ fn main() {
     while let Some(event) = window.next() {
         if let Some(_) = event.render_args() {
             window.draw_2d(&event, |context, graphics, _device| {
-                clear([1.0; 4], graphics);
+                clear([0.33; 4], graphics);
                 for i in 0..led_string.len() {
                     let led = &led_string[i];
                     rectangle([(led.r as f32) / 255.0, (led.g as f32) / 255.0, (led.b as f32) / 255.0, 1.0], // red

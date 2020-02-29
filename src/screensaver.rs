@@ -29,9 +29,8 @@ pub fn tick(led_string: &mut LEDString, time: u32) {
     let mode = 0;
 
     if mode == 0 {
-        for i in 0..led_string.len() {
-            led_string[i].nscale8(250);
-        }
+
+        led_string.nscale8(250);
 
         let n = ((time / 250) % 10) as usize;
         let c = ((20.0 + ((time as f32 / 5000.0).to_radians().sin() * 255.0 + 1.0) * 33.0) % 256.0) as u8;
