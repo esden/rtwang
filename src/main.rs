@@ -71,7 +71,11 @@ fn main() {
                 clear([0.33; 4], graphics);
                 for i in 0..led_string.len() {
                     let led = &led_string[i];
-                    rectangle([(led.r as f32) / 255.0, (led.g as f32) / 255.0, (led.b as f32) / 255.0, 1.0], // red
+                    // convert to f32 and apply inverse gamma to match LEDs
+                    let r = (led.r as f32 / 255.0).powf(1.0/2.2);
+                    let g = (led.g as f32 / 255.0).powf(1.0/2.2);
+                    let b = (led.b as f32 / 255.0).powf(1.0/2.2);
+                    rectangle([r, g, b, 1.0],
                               [1.0 + ((LED_SIZE + LED_MARGIN) * (i as u32)) as f64, LED_MARGIN as f64, LED_SIZE as f64, LED_SIZE as f64],
 	                          context.transform,
 	                          graphics);
