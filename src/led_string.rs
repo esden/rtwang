@@ -64,9 +64,9 @@ impl LED {
 
 impl AddAssign for LED {
     fn add_assign(&mut self, rhs: Self) {
-        self.r += rhs.r;
-        self.g += rhs.g;
-        self.b += rhs.b;
+        self.r = self.r.saturating_add(rhs.r);
+        self.g = self.g.saturating_add(rhs.g);
+        self.b = self.b.saturating_add(rhs.b);
     }
 }
 
@@ -89,6 +89,12 @@ impl LEDString {
 
     pub fn len(&self) -> usize{
         self.leds.len()
+    }
+
+    pub fn clear(&mut self){
+        for led in &mut self.leds {
+            led.set_rgb([0; 3]);
+        }
     }
 
     pub fn nscale8(&mut self, scale: u8) {

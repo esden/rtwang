@@ -24,20 +24,85 @@
 
 use crate::led_string::*;
 
+const DOTSPEED: u32 = 11;
+const DOTS_IN_BOWLS_COUNT: u32 = 3;
+const DOT_DISTANCE: u32 = 65535 / DOTS_IN_BOWLS_COUNT as u32;
+const DOT_BRIGHTNESS: u8 = 255;
+
 pub fn tick(led_string: &mut LEDString, time: u32) {
-    //let mode = (time / 3000) % 5;
-    let mode = 0;
+    let mode = (time / 3000) % 5;
+    //let mode = 4;
 
-    if mode == 0 {
+    match mode {
+        0 => {
+            // Marching green <> orange
+            led_string.nscale8(250);
 
-        led_string.nscale8(250);
-
-        let n = ((time / 250) % 10) as usize;
-        let c = ((20.0 + ((time as f32 / 5000.0).to_radians().sin() * 255.0 + 1.0) * 33.0) % 256.0) as u8;
-        for i in 0..led_string.len() {
-            if (i % 10) == n {
-                led_string[i].set_hsv(c, 255, 150);
+            let n = ((time / 250) % 10) as usize;
+            let c = ((20.0 + ((time as f32 / 5000.0).to_radians().sin() * 255.0 + 1.0) * 33.0) % 256.0) as u8;
+            for i in 0..led_string.len() {
+                if (i % 10) == n {
+                    led_string[i].set_hsv(c, 255, 150);
+                }
             }
         }
+        1 => {
+            // Random flashes
+            led_string.nscale8(250);
+
+            for i in 0..led_string.len() {
+                if (rand::random::<f64>() * 20.0) < 1.0 {
+                    led_string[i].set_hsv(25, 255, 100)
+                }
+            }
+        }
+        2 => {
+            // Dots in bowl
+            led_string.clear();
+
+            for i in 0..DOTS_IN_BOWLS_COUNT {
+                let mm = (i * DOT_DISTANCE) + time.wrapping_mul(DOTSPEED);
+                let mm16 = mm % (1 << 16); // Trim to 16bit
+                let mmf = (mm16 as f32) / (2.0_f32.powf(15.0)); // map to 0.0 - 2.0 range
+                let nsin = ((mmf * std::f32::consts::PI).sin() + 1.0) / 2.0;
+                let n = ((led_string.len() as f32 - 5.0) * nsin + 2.0) as usize;
+                let c: u8 = (mm / 50 % 255) as u8;
+                // println!("i {} mm {:#010X} mm16 {:#06X} mmf {:.4} nsin {:2.4}, n {:03}, c {:#04X}", i, mm, mm16, mmf, nsin, n, c);
+                led_string[n - 2] += LED::new(hsv_rainbow(c, 255, DOT_BRIGHTNESS / 4));
+                led_string[n - 1] += LED::new(hsv_rainbow(c, 255, DOT_BRIGHTNESS / 2));
+                led_string[n + 0] += LED::new(hsv_rainbow(c, 255, DOT_BRIGHTNESS));
+                led_string[n + 1] += LED::new(hsv_rainbow(c, 255, DOT_BRIGHTNESS / 2));
+                led_string[n + 2] += LED::new(hsv_rainbow(c, 255, DOT_BRIGHTNESS / 4));
+            }
+        }
+        3 => {
+            // Sparkles
+            led_string.nscale8(128);
+
+            let c = time % 800;
+            let n;
+            if c < 240 {
+                n = 121 - c / 2;
+            } else {
+                n = 1;
+            }
+
+            for i in 0..led_string.len() {
+                if rand::random::<u8>() <= (n as u8) {
+                    led_string[i].set_rgb([100; 3]);
+                }
+            }
+        }
+        4 => {
+            // Scroll dots
+            for i in 0..led_string.len() {
+                if (i + (time as usize / 100)) % 5 == 0 {
+                    led_string[i].set_rgb([100; 3]);
+                } else {
+                    led_string[i].set_rgb([0; 3]);
+                }
+            }
+        }
+        _ => ()
     }
 }

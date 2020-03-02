@@ -32,6 +32,7 @@ mod led_string;
 use led_string::*;
 
 mod screensaver;
+//mod utils;
 
 const LED_SIZE: u32 = 12;
 const LED_MARGIN: u32 = 1;
