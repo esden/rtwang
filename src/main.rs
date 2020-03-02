@@ -32,6 +32,8 @@ mod led_string;
 use led_string::*;
 
 mod screensaver;
+mod player;
+use player::*;
 //mod utils;
 
 const LED_SIZE: u32 = 12;
@@ -60,12 +62,16 @@ fn main() {
     // Game init
     let mut led_string = LEDString::new(LED_COLOR, LED_STRING_LENGTH);
 
+    // Game objects
+    let mut player = Player::new(1);
+
     // Game loop
     let mut red: u8 = 100;
     let mut frames = 0;
     let mut passed = 0.0;
     let mut ftime = 0.0;
     let mut time: u32; // time in msec
+    let screensaver_on = false;
     while let Some(event) = window.next() {
         if let Some(_) = event.render_args() {
             window.draw_2d(&event, |context, graphics, _device| {
@@ -85,6 +91,28 @@ fn main() {
             frames += 1;
         }
 
+        if let Some(button) = event.press_args() {
+            if button == Button::Keyboard(Key::Left) {
+                println!("Left Down");
+                player.speed -= 1;
+            }
+            if button == Button::Keyboard(Key::Right) {
+                println!("Right Down");
+                player.speed += 1;
+            }
+        }
+
+        if let Some(button) = event.release_args() {
+            if button == Button::Keyboard(Key::Left) {
+                println!("Left Up");
+                player.speed += 1;
+            }
+            if button == Button::Keyboard(Key::Right) {
+                println!("Right Up");
+                player.speed -= 1;
+            }
+        }
+
         if let Some(u) = event.update_args() {
             red = red.wrapping_add(1);
 
@@ -99,7 +127,13 @@ fn main() {
                 passed = 0.0;
             }
 
-            screensaver::tick(&mut led_string, time);
+            if screensaver_on {
+                screensaver::tick(&mut led_string, time);
+            } else {
+                led_string.clear();
+                player.tick(&led_string); //, time);
+                player.draw(&mut led_string);
+            }
         }
     }
 }
