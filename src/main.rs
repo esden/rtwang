@@ -78,6 +78,9 @@ fn main() {
     let mut ftime = 0.0;
     let mut time: u32; // time in msec
     let screensaver_on = false;
+    let mut left = false;
+    let mut right = false;
+    let mut fps = 0.0;
     let mut status = format!("Heya!");
     while let Some(event) = window.next() {
         if let Some(_) = event.render_args() {
@@ -95,6 +98,7 @@ fn main() {
 	                          graphics);
 	           }
                let transform = context.transform.trans(1.0, 25.0);
+               status = format!("FPS: {:.2} DIR: {}{}", fps, if left {"<"} else {" "}, if right {">"} else {" "});
                text::Text::new_color([1.0, 1.0, 1.0, 1.0], 10).draw(
                 &status.to_string(),
                 &mut glyphs,
@@ -113,10 +117,12 @@ fn main() {
             if button == Button::Keyboard(Key::Left) {
                 println!("Left Down");
                 player.speed -= 1;
+                left = true;
             }
             if button == Button::Keyboard(Key::Right) {
                 println!("Right Down");
                 player.speed += 1;
+                right = true;
             }
         }
 
@@ -124,10 +130,12 @@ fn main() {
             if button == Button::Keyboard(Key::Left) {
                 println!("Left Up");
                 player.speed += 1;
+                left = false;
             }
             if button == Button::Keyboard(Key::Right) {
                 println!("Right Up");
                 player.speed -= 1;
+                right = false;
             }
         }
 
@@ -140,9 +148,9 @@ fn main() {
             time = (ftime * 1_000.0).round() as u32;
 
             if passed > 1.0 {
-                let fps = (frames as f64) / passed;
+                fps = (frames as f64) / passed;
                 status = format!("FPS: {:.2} TIM: {}", fps, time);
-                println!("{:?}", status.to_string());
+                println!("FPS: {:.2} TIM: {}", fps, time);
                 frames = 0;
                 passed = 0.0;
             }
