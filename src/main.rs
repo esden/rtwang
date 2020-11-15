@@ -24,6 +24,7 @@
 
 extern crate piston_window;
 extern crate sdl2_window;
+extern crate find_folder;
 
 use piston_window::*;
 use sdl2_window::Sdl2Window;
@@ -54,6 +55,11 @@ fn main() {
         .fullscreen(false)
         .build()
         .unwrap();
+    let assets = find_folder::Search::ParentsThenKids(3, 3)
+        .for_folder("assets").unwrap();
+    let ref font = assets.join("terminal-grotesque.ttf");
+    let mut glyphs = window.load_font(font).unwrap();
+
     // Try to get as close as possible to 60fps
     window.set_ups(60);
 
@@ -72,9 +78,10 @@ fn main() {
     let mut ftime = 0.0;
     let mut time: u32; // time in msec
     let screensaver_on = false;
+    let mut status = format!("Heya!");
     while let Some(event) = window.next() {
         if let Some(_) = event.render_args() {
-            window.draw_2d(&event, |context, graphics, _device| {
+            window.draw_2d(&event, |context, graphics, device| {
                 clear([0.33; 4], graphics);
                 for i in 0..led_string.len() {
                     let led = &led_string[i];
@@ -87,10 +94,21 @@ fn main() {
 	                          context.transform,
 	                          graphics);
 	           }
+               let transform = context.transform.trans(1.0, 25.0);
+               text::Text::new_color([1.0, 1.0, 1.0, 1.0], 10).draw(
+                &status.to_string(),
+                &mut glyphs,
+                &context.draw_state,
+                transform,
+                graphics).unwrap();
+
+               // Update glyphs before rendering.
+               glyphs.factory.encoder.flush(device);
             });
             frames += 1;
         }
 
+        // Keyboard inputs
         if let Some(button) = event.press_args() {
             if button == Button::Keyboard(Key::Left) {
                 println!("Left Down");
@@ -113,6 +131,7 @@ fn main() {
             }
         }
 
+        // Game update & FPS counter
         if let Some(u) = event.update_args() {
             red = red.wrapping_add(1);
 
@@ -122,7 +141,8 @@ fn main() {
 
             if passed > 1.0 {
                 let fps = (frames as f64) / passed;
-                println!("FPS: {:.2} TIM: {}", fps, time);
+                status = format!("FPS: {:.2} TIM: {}", fps, time);
+                println!("{:?}", status.to_string());
                 frames = 0;
                 passed = 0.0;
             }

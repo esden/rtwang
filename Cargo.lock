@@ -285,6 +285,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bb1f6b1ce1c140482ea30ddd3335fc0024ac7ee112895426e0a629a6c20adfe3"
 
 [[package]]
+name = "find_folder"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f6d018fb95a0b59f854aed68ecd96ce2b80af7911b92b1fed3c4b1fa516b91b"
+
+[[package]]
 name = "fnv"
 version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1210,6 +1216,7 @@ checksum = "2439c63f3f6139d1b57529d16bc3b8bb855230c8efcc5d3a896c8bea7c3b1e84"
 name = "rtwang"
 version = "0.1.0"
 dependencies = [
+ "find_folder",
  "piston_window",
  "pistoncore-sdl2_window",
  "rand 0.7.3",
