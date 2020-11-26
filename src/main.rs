@@ -29,6 +29,8 @@ extern crate find_folder;
 use piston_window::*;
 use sdl2_window::Sdl2Window;
 
+mod utils;
+
 mod led_string;
 use led_string::*;
 
@@ -79,10 +81,11 @@ fn main() {
     let mut frames = 0;
     let mut passed = 0.0;
     let mut ftime = 0.0;
-    let mut time: u32; // time in msec
+    let mut time: u32 = 0; // time in msec
     let screensaver_on = false;
     let mut left = false;
     let mut right = false;
+    let mut up = false;
     let mut fps = 0.0;
     let mut status = format!("Heya!");
     while let Some(event) = window.next() {
@@ -101,7 +104,7 @@ fn main() {
 	                          graphics);
 	           }
                let transform = context.transform.trans(1.0, 25.0);
-               status = format!("FPS: {:.2} DIR: {}{}", fps, if left {"<"} else {" "}, if right {">"} else {" "});
+               status = format!("FPS: {:.2} DIR: {}{}{}", fps, if left {"<"} else {" "}, if right {">"} else {" "}, if up {"^"} else {" "});
                text::Text::new_color([1.0, 1.0, 1.0, 1.0], 10).draw(
                 &status.to_string(),
                 &mut glyphs,
@@ -127,6 +130,11 @@ fn main() {
                 player.speed += 1;
                 right = true;
             }
+            if button == Button::Keyboard(Key::Up) {
+                println!("Up Down");
+                player.attack(time);
+                up = true;
+            }
         }
 
         if let Some(button) = event.release_args() {
@@ -139,6 +147,10 @@ fn main() {
                 println!("Right Up");
                 player.speed -= 1;
                 right = false;
+            }
+            if button == Button::Keyboard(Key::Up) {
+                println!("Up Up");
+                up = false;
             }
         }
 
@@ -162,8 +174,8 @@ fn main() {
                 screensaver::tick(&mut led_string, time);
             } else {
                 led_string.clear();
-                player.tick(&led_string); //, time);
-                player.draw(&mut led_string);
+                player.tick(&led_string, time);
+                player.draw(&mut led_string, time);
                 enemy.tick(&led_string, time);
                 enemy.draw(&mut led_string);
             }

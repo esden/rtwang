@@ -77,13 +77,15 @@ impl AddAssign for LED {
 #[derive(Debug)]
 pub struct LEDString {
 	leds: Vec<LED>,
+    null: LED,
 }
 
 impl LEDString {
 
 	pub fn new(color: [u8; 3], length: u32) -> LEDString {
 		LEDString {
-			leds: vec![LED::new(color); length as usize]
+			leds: vec![LED::new(color); length as usize],
+            null: LED::new(color)
 		}
 	}
 
@@ -108,13 +110,21 @@ impl Index<usize> for LEDString {
     type Output = LED;
 
     fn index(&self, i: usize) -> &Self::Output {
-        &self.leds[i]
+        if i >= self.leds.len() {
+            &self.null
+        } else {
+            &self.leds[i]
+        }
     }
 }
 
 impl IndexMut<usize> for LEDString {
     fn index_mut(&mut self, i: usize) -> &mut Self::Output {
-        &mut self.leds[i]
+        if i >= self.leds.len() {
+            &mut self.null
+        } else {
+            &mut self.leds[i]
+        }
     }
 }
 

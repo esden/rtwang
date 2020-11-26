@@ -23,14 +23,15 @@
  */
 
 use crate::led_string::*;
+use crate::utils::*;
 
 pub struct Player {
     position: i32,
     direction: i32,
-    //attack_width: i32,
-    //attacikng: bool,
-    //attacking_millis: u32,
-    //attack_duration: u32,
+    attack_width: i32,
+    attacikng: bool,
+    attacking_millis: u32,
+    attack_duration: u32,
     pub speed: i32,
 }
 
@@ -39,15 +40,45 @@ impl Player {
         Player {
             position: 0,
             direction,
+            attack_width: 8,
+            attacikng: false,
+            attacking_millis: 0,
+            attack_duration: 500,
             speed: 0,
         }
     }
 
-    pub fn draw(&self, led_string: &mut LEDString) {
-        led_string[self.position as usize].set_rgb([0, 255, 0]);
+    pub fn draw(&self, led_string: &mut LEDString, time: u32) {
+        if !self.attacikng {
+            led_string[self.position as usize].set_rgb([0, 255, 0]);
+        } else {
+            self.draw_attack(led_string, time);
+        }
     }
 
-    pub fn tick(&mut self, led_string: &LEDString) { //, time: u32) {
+    fn draw_attack(&self, led_string: &mut LEDString, time: u32) {
+        let mut n = range_map(time - self.attacking_millis, 0, self.attack_duration, 100, 5) as u8;
+        for i in (self.position - (self.attack_width / 2) + 1)..(self.position + (self.attack_width / 2)) {
+            led_string[i as usize].set_rgb([0, 0, n]);
+        }
+        if n > 90 {
+            n = 255;
+            led_string[self.position as usize].set_rgb([255, 255, 255]);
+        } else {
+            n = 0;
+            led_string[self.position as usize].set_rgb([0, 255, 0]);
+        }
+        led_string[(self.position - (self.attack_width / 2)) as usize].set_rgb([n, n, 255]);
+        led_string[(self.position + (self.attack_width / 2)) as usize].set_rgb([n, n, 255]);
+    }
+
+    pub fn tick(&mut self, led_string: &LEDString, time: u32) {
+        if self.attacikng {
+            if self.attacking_millis + self.attack_duration < time {
+                self.attacikng = false;
+            }
+            return;
+        }
         let amount = self.speed * self.direction;
         let len = led_string.len() as i32;
         self.position += amount;
@@ -56,5 +87,10 @@ impl Player {
         } else if self.position >= len {
             self.position = len - 1
         }
+    }
+
+    pub fn attack(&mut self, time: u32) {
+        self.attacking_millis = time;
+        self.attacikng = true;
     }
 }
