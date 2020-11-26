@@ -35,6 +35,8 @@ use led_string::*;
 mod screensaver;
 mod player;
 use player::*;
+mod enemy;
+use enemy::*;
 //mod utils;
 
 const LED_SIZE: u32 = 12;
@@ -51,7 +53,7 @@ fn main() {
         WindowSettings::new("Rusty Spring aka rTWANG!", Size::from(window_dimensions))
         .exit_on_esc(true)
         .resizable(false)
-        .graphics_api(OpenGL::V3_2)
+        //.graphics_api(OpenGL::V3_2)
         .fullscreen(false)
         .build()
         .unwrap();
@@ -70,6 +72,7 @@ fn main() {
 
     // Game objects
     let mut player = Player::new(1);
+    let mut enemy = Enemy::new(100, -4, 20);
 
     // Game loop
     let mut red: u8 = 100;
@@ -161,6 +164,8 @@ fn main() {
                 led_string.clear();
                 player.tick(&led_string); //, time);
                 player.draw(&mut led_string);
+                enemy.tick(&led_string, time);
+                enemy.draw(&mut led_string);
             }
         }
     }

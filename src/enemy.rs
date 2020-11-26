@@ -24,37 +24,42 @@
 
 use crate::led_string::*;
 
-pub struct Player {
+pub struct Enemy {
     position: i32,
-    direction: i32,
-    //attack_width: i32,
-    //attacikng: bool,
-    //attacking_millis: u32,
-    //attack_duration: u32,
-    pub speed: i32,
+    origin: i32,
+    speed: i32,
+    wobble: i32,
+    alive: bool,
+    //player_side: i32
 }
 
-impl Player {
-    pub fn new(direction: i32) -> Player {
-        Player {
-            position: 0,
-            direction,
-            speed: 0,
+impl Enemy {
+    pub fn new(position: i32, speed: i32, wobble: i32) -> Enemy {
+        Enemy {
+            position,
+            origin: position,
+            speed,
+            wobble,
+            alive: true,
+            //player_side: 0
         }
     }
 
     pub fn draw(&self, led_string: &mut LEDString) {
-        led_string[self.position as usize].set_rgb([0, 255, 0]);
+        led_string[self.position as usize].set_rgb([255, 0, 0]);
     }
 
-    pub fn tick(&mut self, led_string: &LEDString) { //, time: u32) {
-        let amount = self.speed * self.direction;
-        let len = led_string.len() as i32;
-        self.position += amount;
-        if self.position < 0 {
-            self.position = 0
-        } else if self.position >= len {
-            self.position = len - 1
+    pub fn tick(&mut self, led_string: &LEDString, time: u32) {
+        if !self.alive {
+            return;
+        }
+        if self.wobble != 0 {
+            self.position = self.origin + (((time as f32 / 3000.0) * self.speed as f32).sin() * self.wobble as f32) as i32;
+        } else {
+            self.position += self.speed;
+            if self.position >= led_string.len() as i32 || self.position < 0 {
+                self.alive = false;
+            }
         }
     }
 }
