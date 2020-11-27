@@ -23,14 +23,15 @@
  */
 
 use crate::led_string::*;
+use crate::Player;
 
 pub struct Enemy {
-    position: i32,
+    pub position: i32,
     origin: i32,
     speed: i32,
     wobble: i32,
-    alive: bool,
-    //player_side: i32
+    pub alive: bool,
+    pub player_side: i32
 }
 
 impl Enemy {
@@ -41,12 +42,14 @@ impl Enemy {
             speed,
             wobble,
             alive: true,
-            //player_side: 0
+            player_side: 1
         }
     }
 
     pub fn draw(&self, led_string: &mut LEDString) {
-        led_string[self.position as usize].set_rgb([255, 0, 0]);
+        if self.alive {
+            led_string[self.position as usize].set_rgb([255, 0, 0]);
+        }
     }
 
     pub fn tick(&mut self, led_string: &LEDString, time: u32) {
@@ -58,6 +61,19 @@ impl Enemy {
         } else {
             self.position += self.speed;
             if self.position >= led_string.len() as i32 || self.position < 0 {
+                self.alive = false;
+            }
+        }
+    }
+
+    pub fn collide(&mut self, player: &Player) {
+        if !self.alive {
+            return;
+        }
+        if player.attacking {
+            let amin = player.position - (player.attack_width / 2);
+            let amax = player.position + (player.attack_width / 2);
+            if amin < self.position && self.position < amax {
                 self.alive = false;
             }
         }

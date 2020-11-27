@@ -24,12 +24,13 @@
 
 use crate::led_string::*;
 use crate::utils::*;
+use crate::Enemy;
 
 pub struct Player {
-    position: i32,
+    pub position: i32,
     direction: i32,
-    attack_width: i32,
-    attacikng: bool,
+    pub attack_width: i32,
+    pub attacking: bool,
     attacking_millis: u32,
     attack_duration: u32,
     pub speed: i32,
@@ -41,7 +42,7 @@ impl Player {
             position: 0,
             direction,
             attack_width: 8,
-            attacikng: false,
+            attacking: false,
             attacking_millis: 0,
             attack_duration: 500,
             speed: 0,
@@ -49,7 +50,7 @@ impl Player {
     }
 
     pub fn draw(&self, led_string: &mut LEDString, time: u32) {
-        if !self.attacikng {
+        if !self.attacking {
             led_string[self.position as usize].set_rgb([0, 255, 0]);
         } else {
             self.draw_attack(led_string, time);
@@ -73,9 +74,9 @@ impl Player {
     }
 
     pub fn tick(&mut self, led_string: &LEDString, time: u32) {
-        if self.attacikng {
+        if self.attacking {
             if self.attacking_millis + self.attack_duration < time {
-                self.attacikng = false;
+                self.attacking = false;
             }
             return;
         }
@@ -89,8 +90,22 @@ impl Player {
         }
     }
 
+    pub fn collide(&mut self, enemy: &Enemy) {
+        if !enemy.alive {
+            return;
+        }
+        if ((enemy.player_side == 1) && (self.position >= enemy.position)) ||
+            ((enemy.player_side == -1) && (self.position <= enemy.position)) {
+            self.die();
+        }
+    }
+
+    pub fn die(&mut self) {
+        self.position = 0;
+    }
+
     pub fn attack(&mut self, time: u32) {
         self.attacking_millis = time;
-        self.attacikng = true;
+        self.attacking = true;
     }
 }

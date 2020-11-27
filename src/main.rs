@@ -175,8 +175,10 @@ fn main() {
             } else {
                 led_string.clear();
                 player.tick(&led_string, time);
-                player.draw(&mut led_string, time);
                 enemy.tick(&led_string, time);
+                player.collide(&enemy);
+                enemy.collide(&player);
+                player.draw(&mut led_string, time);
                 enemy.draw(&mut led_string);
             }
         }
