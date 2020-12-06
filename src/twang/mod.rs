@@ -22,60 +22,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use crate::led_string::*;
-use crate::Player;
+mod utils;
+mod screensaver;
+mod world;
+mod player;
+mod enemy;
 
-pub struct Enemy {
-    pub position: i32,
-    origin: i32,
-    speed: i32,
-    wobble: i32,
-    pub alive: bool,
-    pub player_side: i32
+use world::World;
+use crate::led_string::LEDString;
+
+pub struct Twang {
+    screensaver: bool,
+    world: World
 }
 
-impl Enemy {
-    pub fn new(position: i32, speed: i32, wobble: i32) -> Enemy {
-        Enemy {
-            position,
-            origin: position,
-            speed,
-            wobble,
-            alive: true,
-            player_side: 1
+impl Twang {
+    pub fn new() -> Twang {
+        Twang {
+            screensaver: false,
+            world: World::new()
         }
     }
 
-    pub fn draw(&self, led_string: &mut LEDString) {
-        if self.alive {
-            led_string[self.position as usize].set_rgb([255, 0, 0]);
-        }
-    }
-
-    pub fn tick(&mut self, led_string: &LEDString, time: u32) {
-        if !self.alive {
-            return;
-        }
-        if self.wobble != 0 {
-            self.position = self.origin + (((time as f32 / 3000.0) * self.speed as f32).sin() * self.wobble as f32) as i32;
+    pub fn cycle(&mut self, lr_input: i32, fire_input: bool, led_string: &mut LEDString, time: u32) {
+        if self.screensaver {
+            screensaver::tick(led_string, time);
         } else {
-            self.position += self.speed;
-            if self.position >= led_string.len() as i32 || self.position < 0 {
-                self.alive = false;
+            if fire_input {
+                self.world.player_attack(time);
             }
-        }
-    }
-
-    pub fn collide(&mut self, player: &Player) {
-        if !self.alive {
-            return;
-        }
-        if player.attacking {
-            let amin = player.position - (player.attack_width / 2);
-            let amax = player.position + (player.attack_width / 2);
-            if amin < self.position && self.position < amax {
-                self.alive = false;
-            }
+            self.world.player_set_speed(lr_input);
+            led_string.clear();
+            self.world.tick(led_string, time);
+            self.world.collide();
+            self.world.draw(led_string, time);
         }
     }
 }

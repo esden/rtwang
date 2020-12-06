@@ -25,21 +25,16 @@
 extern crate piston_window;
 extern crate sdl2_window;
 extern crate find_folder;
+extern crate arr_macro;
 
 use piston_window::*;
 use sdl2_window::Sdl2Window;
 
-mod utils;
-
 mod led_string;
 use led_string::*;
 
-mod screensaver;
-mod player;
-use player::*;
-mod enemy;
-use enemy::*;
-//mod utils;
+mod twang;
+use twang::Twang;
 
 const LED_SIZE: u32 = 12;
 const LED_MARGIN: u32 = 1;
@@ -73,19 +68,18 @@ fn main() {
     let mut led_string = LEDString::new(LED_COLOR, LED_STRING_LENGTH);
 
     // Game objects
-    let mut player = Player::new(1);
-    let mut enemy = Enemy::new(100, -4, 20);
+    let mut twang = Twang::new();
 
     // Game loop
     let mut red: u8 = 100;
     let mut frames = 0;
     let mut passed = 0.0;
     let mut ftime = 0.0;
-    let mut time: u32 = 0; // time in msec
-    let screensaver_on = false;
+    let mut time: u32; // time in msec
     let mut left = false;
     let mut right = false;
     let mut up = false;
+    let mut lr_input: i32 = 0;
     let mut fps = 0.0;
     let mut status = format!("Heya!");
     while let Some(event) = window.next() {
@@ -122,17 +116,16 @@ fn main() {
         if let Some(button) = event.press_args() {
             if button == Button::Keyboard(Key::Left) {
                 println!("Left Down");
-                player.speed -= 1;
+                lr_input -= 1;
                 left = true;
             }
             if button == Button::Keyboard(Key::Right) {
                 println!("Right Down");
-                player.speed += 1;
+                lr_input += 1;
                 right = true;
             }
             if button == Button::Keyboard(Key::Up) {
                 println!("Up Down");
-                player.attack(time);
                 up = true;
             }
         }
@@ -140,12 +133,12 @@ fn main() {
         if let Some(button) = event.release_args() {
             if button == Button::Keyboard(Key::Left) {
                 println!("Left Up");
-                player.speed += 1;
+                lr_input += 1;
                 left = false;
             }
             if button == Button::Keyboard(Key::Right) {
                 println!("Right Up");
-                player.speed -= 1;
+                lr_input -= 1;
                 right = false;
             }
             if button == Button::Keyboard(Key::Up) {
@@ -170,17 +163,7 @@ fn main() {
                 passed = 0.0;
             }
 
-            if screensaver_on {
-                screensaver::tick(&mut led_string, time);
-            } else {
-                led_string.clear();
-                player.tick(&led_string, time);
-                enemy.tick(&led_string, time);
-                player.collide(&enemy);
-                enemy.collide(&player);
-                player.draw(&mut led_string, time);
-                enemy.draw(&mut led_string);
-            }
+            twang.cycle(lr_input, up, &mut led_string, time);
         }
     }
 }

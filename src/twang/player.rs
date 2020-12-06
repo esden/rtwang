@@ -22,9 +22,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use crate::led_string::*;
-use crate::utils::*;
-use crate::Enemy;
+use crate::led_string::LEDString;
+use super::utils::range_map;
+use super::enemy::Enemy;
 
 pub struct Player {
     pub position: i32,
