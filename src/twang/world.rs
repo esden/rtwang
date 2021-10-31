@@ -23,7 +23,6 @@
  */
 
 use crate::led_string::LEDString;
-use crate::arr_macro::arr;
 use super::enemy::Enemy;
 use super::player::Player;
 
@@ -36,7 +35,7 @@ impl World {
     pub fn new() -> World {
         World {
             player: Player::new(1),
-            enemies: arr![Enemy::new(100, -4, 20); 5],
+            enemies: [Enemy::new(100, -4, 20); 5],
         }
     }
 

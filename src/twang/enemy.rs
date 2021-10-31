@@ -25,6 +25,7 @@
 use crate::led_string::LEDString;
 use super::player::Player;
 
+#[derive(Copy, Clone)]
 pub struct Enemy {
     pub position: i32,
     origin: i32,

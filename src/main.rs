@@ -25,7 +25,6 @@
 extern crate piston_window;
 extern crate sdl2_window;
 extern crate find_folder;
-extern crate arr_macro;
 
 use piston_window::*;
 use sdl2_window::Sdl2Window;
